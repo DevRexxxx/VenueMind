@@ -48,10 +48,10 @@ class AgentQueryView(APIView):
         if not query:
             return Response({"error": "No query provided"}, status=status.HTTP_400_BAD_REQUEST)
             
-        api_key = os.environ.get("OPENAI_API_KEY", "dummy_key")
+        api_key = os.environ.get("GROQ_API_KEY", "dummy_key")
         if api_key == "dummy_key":
             return Response(
-                {"error": "OpenAI API key is missing. Please add OPENAI_API_KEY to your Render Environment Variables to use the AI features."}, 
+                {"error": "Groq API key is missing. Please add GROQ_API_KEY to your Render Environment Variables to use the AI features for free."}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
         

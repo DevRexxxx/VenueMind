@@ -1,7 +1,7 @@
 import os
 import json
 import time
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from .state import AgentState
 from .tools import (
@@ -11,8 +11,8 @@ from .tools import (
     calculate_evacuation_time
 )
 
-api_key = os.environ.get("OPENAI_API_KEY", "dummy_key")
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.2, api_key=api_key)
+api_key = os.environ.get("GROQ_API_KEY", "dummy_key")
+llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.2, api_key=api_key)
 
 tools = [
     get_sector_status, check_active_incidents, get_available_staff,
@@ -69,7 +69,7 @@ def _invoke_agent(state: AgentState, name: str, prompt: str):
     import os
     
     # Defaults
-    model_name = "gpt-4o-mini"
+    model_name = "llama-3.1-8b-instant"
     temperature = 0.2
     autonomy_level = "advisory"
     confidence_threshold = 92
@@ -83,8 +83,8 @@ def _invoke_agent(state: AgentState, name: str, prompt: str):
     except AgentConfig.DoesNotExist:
         pass
         
-    api_key = os.environ.get("OPENAI_API_KEY", "dummy_key")
-    dynamic_llm = ChatOpenAI(model=model_name, temperature=temperature, api_key=api_key)
+    api_key = os.environ.get("GROQ_API_KEY", "dummy_key")
+    dynamic_llm = ChatGroq(model=model_name, temperature=temperature, api_key=api_key)
     dynamic_llm_with_tools = dynamic_llm.bind_tools(tools)
 
     messages = state["messages"]
