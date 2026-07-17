@@ -43,9 +43,17 @@ class AgentQueryView(APIView):
     Endpoint to send a natural language query to the LangGraph AI Orchestrator.
     """
     def post(self, request):
+        import os
         query = request.data.get('query')
         if not query:
             return Response({"error": "No query provided"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        api_key = os.environ.get("OPENAI_API_KEY", "dummy_key")
+        if api_key == "dummy_key":
+            return Response(
+                {"error": "OpenAI API key is missing. Please add OPENAI_API_KEY to your Render Environment Variables to use the AI features."}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         
         try:
             response_text = invoke_agent_network(query)
