@@ -32,7 +32,7 @@ export function IncidentTimeline() {
   useEffect(() => {
     const fetchIncidents = async () => {
       try {
-        const data = await apiFetch<unknown>('/incidents/', {}, PaginatedIncidentSchema);
+        const data = await apiFetch<z.infer<typeof PaginatedIncidentSchema>>('/incidents/', {}, PaginatedIncidentSchema);
         setIncidents(data.results.reverse()); // latest first
       } catch (err) {
         console.error("Failed to fetch incidents", err);

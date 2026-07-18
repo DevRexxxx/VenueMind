@@ -14,7 +14,7 @@ const TRANSPORT = [
 ];
 
 export function TransportOverview() {
-  const colorMap: unknown = {
+  const colorMap: Record<string, Record<string, string>> = {
     green: { bar: "bg-[#10b981]", text: "text-[#10b981]" },
     orange: { bar: "bg-[#f59e0b]", text: "text-[#f59e0b]" },
     red: { bar: "bg-[#ef4444]", text: "text-[#ef4444]" },

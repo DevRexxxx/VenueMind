@@ -163,8 +163,18 @@ function LegendItem({ color, label }: { color: string, label: string }) {
   );
 }
 
-function Marker({ top, left, right, bottom, color, label, pulse }: unknown) {
-  const colorMap: unknown = {
+interface MarkerProps {
+  top?: string;
+  left?: string;
+  right?: string;
+  bottom?: string;
+  color: string;
+  label: string;
+  pulse?: boolean;
+}
+
+function Marker({ top, left, right, bottom, color, label, pulse }: MarkerProps) {
+  const colorMap: Record<string, string> = {
     green: "bg-[#10b981] shadow-[#10b981]/50",
     orange: "bg-[#f59e0b] shadow-[#f59e0b]/50",
     purple: "bg-[#a855f7] shadow-[#a855f7]/50",

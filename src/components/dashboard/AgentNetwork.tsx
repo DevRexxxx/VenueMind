@@ -6,7 +6,7 @@ import { Users, AlertTriangle, MessageSquare, Shield, Activity, Sun, ShieldAlert
 import { cn, WS_BASE_URL } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
 import { z } from "zod";
-import { AgentStatusSchema } from "@/lib/schemas";
+import { AgentStatusSchema, AgentStatus } from "@/lib/schemas";
 
 const INITIAL_AGENTS = [
   { id: "crowd", label: "Crowd Agent", icon: Users, status: "Healthy", color: "green" },
@@ -24,10 +24,10 @@ export function AgentNetwork() {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const liveData = await apiFetch<unknown[]>('/agent-status/', {}, z.array(AgentStatusSchema));
+        const liveData = await apiFetch<AgentStatus[]>('/agent-status/', {}, z.array(AgentStatusSchema));
         // Merge live data with icons
         const merged = INITIAL_AGENTS.map(base => {
-          const live = liveData.find((a: unknown) => a.id === base.id);
+          const live = liveData.find(a => a.id === base.id);
           if (live) {
             return { ...base, status: live.status, color: live.color };
           }
@@ -67,7 +67,7 @@ export function AgentNetwork() {
     }
   });
 
-  const colorMap: unknown = {
+  const colorMap: Record<string, Record<string, string>> = {
     green: { bg: "bg-[#10b981]/20", text: "text-[#10b981]", border: "border-[#10b981]/30", dot: "bg-[#10b981]", shadow: "shadow-[0_0_8px_#10b981]" },
     blue: { bg: "bg-[#3b82f6]/20", text: "text-[#3b82f6]", border: "border-[#3b82f6]/30", dot: "bg-[#3b82f6]", shadow: "shadow-[0_0_8px_#3b82f6]" },
     orange: { bg: "bg-[#f59e0b]/20", text: "text-[#f59e0b]", border: "border-[#f59e0b]/30", dot: "bg-[#f59e0b]", shadow: "shadow-[0_0_8px_#f59e0b]" },

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from "zod";
-import { SimulationResponseSchema } from "@/lib/schemas";
+import { SimulationResponseSchema, SimulationResponse } from "@/lib/schemas";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SimResult {
@@ -28,16 +28,16 @@ export function SimulationMode() {
     setSimResults(null);
     
     try {
-      const data = await apiFetch<unknown>('/simulate/', {
+      const data = await apiFetch<SimulationResponse>('/simulate/', {
         method: "POST",
         body: JSON.stringify({ scenario })
       }, SimulationResponseSchema);
       
-      const criticalSectors = data.simulated_sectors.filter((s: unknown) => s.status === 'critical' || s.status === 'warning');
+      const criticalSectors = data.simulated_sectors.filter(s => s.status === 'critical' || s.status === 'warning');
       setSimResults(criticalSectors);
       setToastMessage(`Simulation complete. ${criticalSectors.length} sectors flagged as critical/warning in this scenario.`);
     } catch (err: unknown) {
-      setToastMessage(`Simulation failed: ${err.message || "Backend error"}`);
+      setToastMessage(`Simulation failed: ${err instanceof Error ? err.message : "Backend error"}`);
     } finally {
       setRunning(false);
     }

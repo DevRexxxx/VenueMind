@@ -45,7 +45,7 @@ export function CommandAssistant() {
       });
       // The backend returns 202 instantly, and processes in the background.
     } catch (err: unknown) {
-      setAiResponse(`Error: ${err.message || "Failed to connect to AI Orchestrator."}`);
+      setAiResponse(`Error: ${err instanceof Error ? err.message : "Failed to connect to AI Orchestrator."}`);
       setIsThinking(false);
     } finally {
       setQuery("");
