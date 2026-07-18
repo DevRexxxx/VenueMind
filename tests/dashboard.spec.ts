@@ -35,7 +35,9 @@ test.describe('VenueMind Dashboard', () => {
       });
     });
 
-    await page.route('**/orchestrator/', async (route) => {
+    await page.route('**/agent-query/', async (route) => {
+      // Simulate network delay so 'isThinking' stays visible long enough for Playwright
+      await new Promise(resolve => setTimeout(resolve, 500));
       await route.fulfill({
         status: 202,
         contentType: 'application/json',
