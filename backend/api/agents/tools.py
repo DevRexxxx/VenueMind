@@ -79,9 +79,14 @@ def calculate_evacuation_time(sector_name: str) -> str:
     """Calculates estimated evacuation time for a sector based on current live density."""
     try:
         sector = Sector.objects.get(name__icontains=sector_name)
-        density = (sector.current_occupancy / sector.capacity) * 100
-        time = round(density * 0.15, 1) # simple mock formula
-        return f"Estimated evacuation time for {sector.name} is {time} minutes."
+        # Use max_density as the capacity reference (the field that exists on the model)
+        max_density = sector.max_density or 1
+        # Get latest crowd metric snapshot for current density estimate
+        from api.models import CrowdMetricSnapshot
+        latest_snapshot = CrowdMetricSnapshot.objects.filter(sector=sector).order_by('-timestamp').first()
+        current_density = latest_snapshot.density if latest_snapshot else 50  # Default to 50% if no data
+        time_estimate = round(current_density * 0.15, 1)  # simple mock formula
+        return f"Estimated evacuation time for {sector.name} is {time_estimate} minutes (density: {current_density}%, max capacity: {max_density})."
     except Sector.DoesNotExist:
         return f"Sector {sector_name} not found."
 

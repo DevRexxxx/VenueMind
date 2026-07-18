@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Play, RotateCcw, Activity, CheckCircle2, X, AlertTriangle } from "lucide-react";
-import { cn, API_BASE_URL } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
+import { z } from "zod";
+import { SimulationResponseSchema } from "@/lib/schemas";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SimResult {
@@ -24,22 +27,16 @@ export function SimulationMode() {
     setSimResults(null);
     
     try {
-      const res = await fetch(`${API_BASE_URL}/simulate/`, {
+      const data = await apiFetch<any>('/simulate/', {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ scenario })
-      });
+      }, SimulationResponseSchema);
       
-      if (res.ok) {
-        const data = await res.json();
-        const criticalSectors = data.simulated_sectors.filter((s: any) => s.status === 'critical' || s.status === 'warning');
-        setSimResults(criticalSectors);
-        setToastMessage(`Simulation complete. ${criticalSectors.length} sectors flagged as critical/warning in this scenario.`);
-      } else {
-        setToastMessage("Simulation failed. Backend error.");
-      }
-    } catch (err) {
-      setToastMessage("Failed to connect to simulation engine.");
+      const criticalSectors = data.simulated_sectors.filter((s: any) => s.status === 'critical' || s.status === 'warning');
+      setSimResults(criticalSectors);
+      setToastMessage(`Simulation complete. ${criticalSectors.length} sectors flagged as critical/warning in this scenario.`);
+    } catch (err: any) {
+      setToastMessage(`Simulation failed: ${err.message || "Backend error"}`);
     } finally {
       setRunning(false);
     }

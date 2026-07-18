@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import Stadium, Sector, Gate, Staff, Incident, Alert, Asset, CrowdMetricSnapshot
+from .models import (
+    Stadium, Sector, Gate, Staff, Incident, Alert, Asset, CrowdMetricSnapshot,
+    AgentFeedback, ModelVersion, SustainabilityMetric, IncidentBiasAudit, AgentConfig
+)
 
 class StadiumSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,8 +44,6 @@ class CrowdMetricSnapshotSerializer(serializers.ModelSerializer):
         model = CrowdMetricSnapshot
         fields = '__all__'
 
-from .models import AgentFeedback, ModelVersion, SustainabilityMetric, IncidentBiasAudit
-
 class AgentFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = AgentFeedback
@@ -63,9 +64,8 @@ class IncidentBiasAuditSerializer(serializers.ModelSerializer):
         model = IncidentBiasAudit
         fields = '__all__'
 
-from .models import AgentConfig
-
 class AgentConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = AgentConfig
         fields = '__all__'
+

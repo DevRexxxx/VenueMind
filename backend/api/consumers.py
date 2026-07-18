@@ -4,8 +4,9 @@ import random
 import aiohttp
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from django.core.cache import cache
 from datetime import datetime
-from api.models import Incident, Alert
+from api.models import Incident, Alert, AgentConfig
 
 def get_wmo_weather_condition(code):
     # Map WMO weather codes to our conditions
@@ -69,28 +70,85 @@ class DashboardConsumer(AsyncWebsocketConsumer):
             
         return {"text": "All Systems Operational", "color": "#10b981"}
 
+    @database_sync_to_async
+    def get_agent_network_status(self):
+        # Fetch active agents dynamically
+        agent_configs = AgentConfig.objects.all()
+        agents = []
+        for config in agent_configs:
+            agents.append({
+                "id": config.agent_id.lower(),
+                "label": f"{config.agent_id} Agent",
+                "type": config.agent_id
+            })
+
+        if not agents:
+            agents = [
+                {"id": "crowd", "label": "Crowd Agent", "type": "Crowd"},
+                {"id": "gate", "label": "Gate Agent", "type": "System"},
+                {"id": "comm", "label": "Communication Agent", "type": "System"},
+                {"id": "security", "label": "Security Agent", "type": "Security"},
+                {"id": "medical", "label": "Medical Agent", "type": "Medical"},
+                {"id": "weather", "label": "Weather Agent", "type": "Weather"},
+                {"id": "emergency", "label": "Emergency Agent", "type": "System"},
+            ]
+            
+        active_incidents = Incident.objects.exclude(status='resolved')
+        
+        results = []
+        for agent in agents:
+            agent_incidents = active_incidents.filter(type=agent["type"])
+            if not agent_incidents.exists():
+                status_label = "Standby" if agent["id"] == "emergency" else "Healthy"
+                color = "gray" if agent["id"] == "emergency" else "green"
+            else:
+                severities = [inc.severity for inc in agent_incidents]
+                if 'critical' in severities:
+                    status_label, color = "Critical", "red"
+                elif 'high' in severities:
+                    status_label, color = "Active", "blue"
+                else:
+                    status_label, color = "Warning", "orange"
+                    
+            results.append({
+                "id": agent["id"],
+                "label": agent["label"],
+                "status": status_label,
+                "color": color
+            })
+        return results
+
     async def simulate_live_data(self):
         try:
             while True:
                 weather_temp = "26°C"
                 weather_condition = "Clear Sky"
+                # Check cache first for weather
+                weather_data = cache.get("live_weather_data")
                 
-                # Fetch real weather for New York / New Jersey (MetLife Stadium)
-                try:
-                    async with aiohttp.ClientSession() as session:
-                        url = "https://api.open-meteo.com/v1/forecast?latitude=40.81&longitude=-74.07&current_weather=true"
-                        async with session.get(url, timeout=5) as resp:
-                            if resp.status == 200:
-                                data = await resp.json()
-                                current = data.get('current_weather', {})
-                                weather_temp = f"{round(current.get('temperature', 26))}°C"
-                                weather_condition = get_wmo_weather_condition(current.get('weathercode', 0))
-                except Exception as e:
-                    print("Error fetching weather:", e)
-                    pass
+                if weather_data:
+                    weather_temp = weather_data.get("temp", weather_temp)
+                    weather_condition = weather_data.get("condition", weather_condition)
+                else:
+                    # Fetch real weather for New York / New Jersey (MetLife Stadium)
+                    try:
+                        async with aiohttp.ClientSession() as session:
+                            url = "https://api.open-meteo.com/v1/forecast?latitude=40.81&longitude=-74.07&current_weather=true"
+                            async with session.get(url, timeout=5) as resp:
+                                if resp.status == 200:
+                                    data = await resp.json()
+                                    current = data.get('current_weather', {})
+                                    weather_temp = f"{round(current.get('temperature', 26))}°C"
+                                    weather_condition = get_wmo_weather_condition(current.get('weathercode', 0))
+                                    # Cache for 5 minutes (300 seconds)
+                                    cache.set("live_weather_data", {"temp": weather_temp, "condition": weather_condition}, 300)
+                    except Exception as e:
+                        print("Error fetching weather:", e)
+                        pass
 
                 # Query database for real system status
                 system_status = await self.get_system_status()
+                agent_network = await self.get_agent_network_status()
 
                 # Build payload
                 payload = {
@@ -101,6 +159,7 @@ class DashboardConsumer(AsyncWebsocketConsumer):
                             'condition': weather_condition
                         },
                         'system_status': system_status,
+                        'agent_network': agent_network,
                         'match': {
                             'home': 'ARG',
                             'away': 'FRA',

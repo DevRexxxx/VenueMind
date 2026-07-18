@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Brain, Activity, ShieldAlert, CloudRain, Users, Accessibility, Search, AlertCircle, ShoppingCart, X, Settings2, SlidersHorizontal, Cpu } from "lucide-react";
-import { cn, API_BASE_URL } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 
 const AGENTS = [
   { name: "Orchestrator", icon: Brain, color: "text-[#0ea5e9]", bg: "bg-[#0ea5e9]/10", border: "border-[#0ea5e9]/20", role: "Central Routing & Synthesis", status: "Online", load: "42%" },
@@ -31,22 +32,19 @@ export default function AgentsPage() {
     // Fetch current config for this agent
     try {
       const agentId = agent.name.split(' ')[0]; // e.g., 'Security', 'Medical'
-      const res = await fetch(`${API_BASE_URL}/agent-config/${agentId}/`);
-      if (res.ok) {
-        const data = await res.json();
+      const data = await apiFetch<any>(`/agent-config/${agentId}/`);
+      if (data) {
         setAutonomyLevel(data.autonomy_level);
         setModelEngine(data.model_engine);
         setTemperature(Math.round(data.temperature * 100));
         setConfidence(data.confidence_threshold);
-      } else {
-        // Defaults if not found
-        setAutonomyLevel("advisory");
-        setModelEngine("gpt-4o-mini");
-        setTemperature(20);
-        setConfidence(92);
       }
     } catch (e) {
       console.error(e);
+      setAutonomyLevel("advisory");
+      setModelEngine("gpt-4o-mini");
+      setTemperature(20);
+      setConfidence(92);
     }
   };
 
@@ -62,17 +60,14 @@ export default function AgentsPage() {
         confidence_threshold: confidence
       };
       
-      const res = await fetch(`${API_BASE_URL}/agent-config/${agentId}/`, {
-        method: 'PUT', // Try PUT first
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      
-      if (res.status === 404) {
-        // If not found, create it via POST
-        await fetch(`${API_BASE_URL}/agent-config/`, {
+      try {
+        await apiFetch(`/agent-config/${agentId}/`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
+        await apiFetch(`/agent-config/`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
       }
@@ -134,7 +129,7 @@ export default function AgentsPage() {
 
             {/* Hover actions */}
             <div className="absolute inset-0 bg-black/60 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 z-20">
-              <button className="text-[10px] font-bold uppercase tracking-widest bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg border border-white/20 transition-colors w-32">
+              <button className="text-[10px] font-bold uppercase tracking-widest bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg border border-white/20 transition-colors w-32" aria-label={`View logs for ${agent.name}`}>
                 View Logs
               </button>
               <button 
@@ -150,7 +145,7 @@ export default function AgentsPage() {
 
       {/* Configuration Modal */}
       {configAgent && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-8">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-8" role="dialog" aria-modal="true" aria-label={`${configAgent.name} agent configuration`}>
           <div className="glass-card w-full max-w-2xl border border-white/10 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-5 border-b border-white/5 bg-white/[0.02]">
@@ -163,8 +158,8 @@ export default function AgentsPage() {
                   <p className="text-xs text-white/50">{configAgent.name} - Settings & Permissions</p>
                 </div>
               </div>
-              <button onClick={() => setConfigAgent(null)} className="text-white/40 hover:text-white transition-colors p-1">
-                <X size={20} />
+              <button onClick={() => setConfigAgent(null)} aria-label="Close configuration modal" className="text-white/40 hover:text-white transition-colors p-1">
+                <X size={20} aria-hidden="true" />
               </button>
             </div>
 

@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import useWebSocket from "react-use-websocket";
 import { Users, AlertTriangle, MessageSquare, Shield, Activity, Sun, ShieldAlert } from "lucide-react";
-import { cn, API_BASE_URL } from "@/lib/utils";
+import { cn, WS_BASE_URL } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
+import { z } from "zod";
+import { AgentStatusSchema } from "@/lib/schemas";
 
 const INITIAL_AGENTS = [
   { id: "crowd", label: "Crowd Agent", icon: Users, status: "Healthy", color: "green" },
@@ -20,29 +24,44 @@ export function AgentNetwork() {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/agent-status/`);
-        if (res.ok) {
-          const liveData = await res.json();
-          // Merge live data with icons
-          const merged = INITIAL_AGENTS.map(base => {
-            const live = liveData.find((a: any) => a.id === base.id);
-            if (live) {
-              return { ...base, status: live.status, color: live.color };
-            }
-            return base;
-          });
-          setAgents(merged);
-        }
+        const liveData = await apiFetch<any[]>('/agent-status/', {}, z.array(AgentStatusSchema));
+        // Merge live data with icons
+        const merged = INITIAL_AGENTS.map(base => {
+          const live = liveData.find((a: any) => a.id === base.id);
+          if (live) {
+            return { ...base, status: live.status, color: live.color };
+          }
+          return base;
+        });
+        setAgents(merged);
       } catch (err) {
-        console.error("Failed to fetch live agent status", err);
+        console.error("Failed to fetch initial agent status", err);
       }
     };
-
     fetchStatus();
-    // Poll every 5 seconds for live status
-    const intervalId = setInterval(fetchStatus, 5000);
-    return () => clearInterval(intervalId);
   }, []);
+
+  // Listen for WebSocket updates
+  const { lastJsonMessage } = useWebSocket(`${WS_BASE_URL}/dashboard/`, {
+    share: true,
+    shouldReconnect: () => true,
+  });
+
+  useEffect(() => {
+    if (lastJsonMessage && (lastJsonMessage as any).type === 'live_header') {
+      const data = (lastJsonMessage as any).data;
+      if (data && data.agent_network) {
+        const liveData = data.agent_network;
+        setAgents(prevAgents => prevAgents.map(base => {
+          const live = liveData.find((a: any) => a.id === base.id);
+          if (live) {
+            return { ...base, status: live.status, color: live.color };
+          }
+          return base;
+        }));
+      }
+    }
+  }, [lastJsonMessage]);
 
   const colorMap: any = {
     green: { bg: "bg-[#10b981]/20", text: "text-[#10b981]", border: "border-[#10b981]/30", dot: "bg-[#10b981]", shadow: "shadow-[0_0_8px_#10b981]" },
@@ -53,7 +72,7 @@ export function AgentNetwork() {
   };
 
   return (
-    <div className="glass-card w-full h-full p-4 flex flex-col relative overflow-hidden group">
+    <div className="glass-card w-full h-full p-4 flex flex-col relative overflow-hidden group" role="region" aria-label="AI Agent network status">
       
       {/* Header */}
       <div className="flex justify-between items-start mb-4 z-10 shrink-0">
@@ -81,7 +100,8 @@ export function AgentNetwork() {
                 </div>
               </div>
               <div className="flex items-center gap-2 pr-2">
-                <div className={cn("w-2 h-2 rounded-full", style?.dot, style?.shadow, agent.status !== "Standby" && "animate-pulse")}></div>
+                <div className={cn("w-2 h-2 rounded-full", style?.dot, style?.shadow, agent.status !== "Standby" && "animate-pulse")} aria-hidden="true"></div>
+                <span className="sr-only">{agent.status}</span>
               </div>
             </div>
           );

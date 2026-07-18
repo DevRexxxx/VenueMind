@@ -24,13 +24,13 @@ export function DigitalTwin() {
         {/* Left Toolbar */}
         <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-20">
           <div className="glass-card flex flex-col p-1 gap-1 border-white/10">
-            <button onClick={() => setView("2D")} className={cn("p-2 rounded-lg text-xs font-bold", view === "2D" ? "bg-[#3b82f6] text-white" : "text-white/50 hover:text-white hover:bg-white/5")}>2D</button>
-            <button onClick={() => setView("3D")} className={cn("p-2 rounded-lg text-xs font-bold", view === "3D" ? "bg-[#3b82f6] text-white" : "text-white/50 hover:text-white hover:bg-white/5")}>3D</button>
+            <button onClick={() => setView("2D")} aria-label="Switch to 2D view" className={cn("p-2 rounded-lg text-xs font-bold", view === "2D" ? "bg-[#3b82f6] text-white" : "text-white/50 hover:text-white hover:bg-white/5")}>2D</button>
+            <button onClick={() => setView("3D")} aria-label="Switch to 3D view" className={cn("p-2 rounded-lg text-xs font-bold", view === "3D" ? "bg-[#3b82f6] text-white" : "text-white/50 hover:text-white hover:bg-white/5")}>3D</button>
           </div>
           <div className="glass-card flex flex-col p-1 gap-1 border-white/10 mt-4">
-            <button className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/5"><Plus size={16} /></button>
+            <button aria-label="Zoom in" className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/5"><Plus size={16} /></button>
             <div className="w-full h-px bg-white/10"></div>
-            <button className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/5"><Minus size={16} /></button>
+            <button aria-label="Zoom out" className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/5"><Minus size={16} /></button>
           </div>
         </div>
 
@@ -46,7 +46,8 @@ export function DigitalTwin() {
             {/* Outer Ring */}
             <div className="absolute inset-0 rounded-[50%] border-4 border-[#3b82f6]/20 shadow-[0_0_30px_rgba(59,130,246,0.1)] flex items-center justify-center">
               {/* Colored Sectors */}
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Stadium sector map showing crowd density across four sections">
+                <title>Stadium sector density visualization</title>
                 <path d="M 50 0 A 50 50 0 0 1 100 50 L 80 50 A 30 30 0 0 0 50 20 Z" fill="rgba(239, 68, 68, 0.4)" stroke="rgba(255,255,255,0.1)" /> {/* Red Section */}
                 <path d="M 100 50 A 50 50 0 0 1 50 100 L 50 80 A 30 30 0 0 0 80 50 Z" fill="rgba(245, 158, 11, 0.4)" stroke="rgba(255,255,255,0.1)" /> {/* Orange Section */}
                 <path d="M 50 100 A 50 50 0 0 1 0 50 L 20 50 A 30 30 0 0 0 50 80 Z" fill="rgba(16, 185, 129, 0.4)" stroke="rgba(255,255,255,0.1)" /> {/* Green Section */}
@@ -127,6 +128,9 @@ export function DigitalTwin() {
           <span className="text-[10px] text-white/50 uppercase tracking-wider font-bold">Heat Map</span>
           <button 
             onClick={() => setHeatMap(!heatMap)}
+            role="switch"
+            aria-checked={heatMap}
+            aria-label="Toggle heat map overlay"
             className={cn("w-8 h-4 rounded-full relative transition-colors", heatMap ? "bg-[#3b82f6]" : "bg-white/20")}
           >
             <div className={cn("w-3 h-3 bg-white rounded-full absolute top-0.5 transition-all", heatMap ? "left-4.5" : "left-0.5")}></div>

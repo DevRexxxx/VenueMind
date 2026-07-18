@@ -8,6 +8,7 @@ import { VolunteerDispatch } from "@/components/dashboard/VolunteerDispatch";
 import { TransportOverview } from "@/components/dashboard/TransportOverview";
 import { SystemLogs } from "@/components/dashboard/SystemLogs";
 import { CommandAssistant } from "@/components/dashboard/CommandAssistant";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export default function Home() {
   return (
@@ -15,19 +16,27 @@ export default function Home() {
       
       {/* Top Row: 6 KPI Cards */}
       <div className="min-h-[100px] shrink-0">
-        <TopKPIs />
+        <ErrorBoundary fallbackName="Top KPIs">
+          <TopKPIs />
+        </ErrorBoundary>
       </div>
 
       {/* Middle Row: Digital Twin (Left 6) | Agent Network (Mid 3) | Live Incidents (Right 3) */}
       <div className="grid grid-cols-12 gap-4 flex-1 min-h-[450px] shrink-0">
         <div className="col-span-12 xl:col-span-6 h-full">
-          <DigitalTwin />
+          <ErrorBoundary fallbackName="Digital Twin">
+            <DigitalTwin />
+          </ErrorBoundary>
         </div>
         <div className="col-span-12 lg:col-span-6 xl:col-span-3 h-full">
-          <AgentNetwork />
+          <ErrorBoundary fallbackName="Agent Network">
+            <AgentNetwork />
+          </ErrorBoundary>
         </div>
         <div className="col-span-12 lg:col-span-6 xl:col-span-3 h-full">
-          <IncidentTimeline />
+          <ErrorBoundary fallbackName="Incident Timeline">
+            <IncidentTimeline />
+          </ErrorBoundary>
         </div>
       </div>
 

@@ -51,7 +51,7 @@ export function Header() {
   }, []);
 
   return (
-    <header className="h-20 w-full flex items-center justify-between px-6 py-2 z-10 border-b border-white/5 bg-[#05050A]/80 backdrop-blur-md">
+    <header role="banner" aria-label="Dashboard header" className="h-20 w-full flex items-center justify-between px-6 py-2 z-10 border-b border-white/5 bg-background/80 backdrop-blur-md">
       
       {/* Left: Event Logo */}
       <div className="flex items-center space-x-3 w-64">
@@ -95,9 +95,9 @@ export function Header() {
         </div>
 
         {/* Time & Date */}
-        <div className="flex flex-col items-end border-r border-white/10 pr-6">
+        <div className="flex flex-col items-end border-r border-white/10 pr-6" aria-live="polite" aria-label="Current time">
           <span className="text-lg font-mono font-light tracking-wider text-white/90 leading-none mb-1">{time}</span>
-          <span className="text-[10px] text-white/50 tracking-wider uppercase">{date}</span>
+          <span className="text-[11px] text-white/50 tracking-wider uppercase">{date}</span>
         </div>
 
         {/* Weather */}

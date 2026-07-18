@@ -5,6 +5,9 @@ import { AlertCircle, ShieldAlert, CheckCircle2, MessageSquareText, ThumbsUp, Th
 import { motion, AnimatePresence } from "framer-motion";
 import useWebSocket from "react-use-websocket";
 import { cn, API_BASE_URL, WS_BASE_URL } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
+import { z } from "zod";
+import { IncidentSchema, PaginatedIncidentSchema } from "@/lib/schemas";
 
 interface Incident {
   id?: number;
@@ -26,11 +29,8 @@ export function IncidentTimeline() {
   useEffect(() => {
     const fetchIncidents = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/incidents/`);
-        if (res.ok) {
-          const data = await res.json();
-          setIncidents(data.reverse()); // latest first
-        }
+        const data = await apiFetch<any>('/incidents/', {}, PaginatedIncidentSchema);
+        setIncidents(data.results.reverse()); // latest first
       } catch (err) {
         console.error("Failed to fetch incidents", err);
       }
@@ -40,6 +40,7 @@ export function IncidentTimeline() {
 
   // Listen for WebSocket updates
   const { lastJsonMessage } = useWebSocket(`${WS_BASE_URL}/dashboard/`, {
+    share: true,
     shouldReconnect: () => true,
   });
 
@@ -60,7 +61,7 @@ export function IncidentTimeline() {
   }, [lastJsonMessage]);
 
   return (
-    <div className="glass-card w-full h-full p-4 flex flex-col relative overflow-hidden group">
+    <div className="glass-card w-full h-full p-4 flex flex-col relative overflow-hidden group" role="region" aria-label="Live incident timeline">
       
       {/* Header */}
       <div className="flex justify-between items-center mb-3 shrink-0">
@@ -86,7 +87,8 @@ export function IncidentTimeline() {
             <div key={uniqueId} className={cn("p-3 rounded-lg border bg-white/[0.02] hover:bg-white/[0.04] transition-colors", severityColor.border)}>
               <div className="flex justify-between items-start mb-1">
                 <div className="flex items-center gap-2">
-                  <div className={cn("w-2 h-2 rounded-full", severityColor.dot, severityColor.shadow)}></div>
+                  <div className={cn("w-2 h-2 rounded-full", severityColor.dot, severityColor.shadow)} aria-hidden="true"></div>
+                  <span className="sr-only">{inc.severity} severity</span>
                   <span className="text-[10px] font-mono text-white/40">{timeStr}</span>
                 </div>
                 <span className={cn("text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded border", 
@@ -107,24 +109,28 @@ export function IncidentTimeline() {
               <div className="mt-2 flex gap-1.5">
                 <button 
                   onClick={() => setExpandedId(expandedId === uniqueId ? null : uniqueId)}
+                  aria-expanded={expandedId === uniqueId}
+                  aria-label={`Show reasoning trace for ${desc}`}
                   className={cn("flex items-center gap-1 text-[8px] uppercase font-bold px-2 py-1 rounded border transition-colors", 
                     expandedId === uniqueId ? "bg-white/20 border-white/30 text-white" : "bg-white/5 hover:bg-white/10 border-white/10 text-white/50"
                   )}
                 >
-                  <MessageSquareText size={9} />
+                  <MessageSquareText size={9} aria-hidden="true" />
                   Why
                 </button>
                 <button 
                   onClick={() => alert('Feedback recorded: Positive')}
+                  aria-label="Rate this decision as positive"
                   className="flex items-center gap-1 text-[8px] uppercase font-bold bg-white/5 hover:bg-white/10 px-1.5 py-1 rounded border border-white/10 text-white/50 hover:text-[#10b981] transition-colors"
                 >
-                  <ThumbsUp size={9} />
+                  <ThumbsUp size={9} aria-hidden="true" />
                 </button>
                 <button 
                   onClick={() => alert('Feedback recorded: Negative')}
+                  aria-label="Rate this decision as negative"
                   className="flex items-center gap-1 text-[8px] uppercase font-bold bg-white/5 hover:bg-white/10 px-1.5 py-1 rounded border border-white/10 text-white/50 hover:text-[#ef4444] transition-colors"
                 >
-                  <ThumbsDown size={9} />
+                  <ThumbsDown size={9} aria-hidden="true" />
                 </button>
               </div>
 

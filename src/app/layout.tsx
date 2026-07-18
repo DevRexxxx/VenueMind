@@ -24,16 +24,21 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex h-screen overflow-hidden font-sans text-white relative bg-[#05050A]">
+      <body className="min-h-full flex h-screen overflow-hidden font-sans text-white relative bg-background">
+        {/* Skip Navigation Link for Accessibility */}
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[#3b82f6] focus:text-white focus:rounded-lg focus:text-sm focus:font-bold">
+          Skip to main content
+        </a>
+
         {/* Soft Radial Glows - Updated to Cyan/Blue */}
-        <div className="absolute top-[-20%] left-[-10%] w-[1000px] h-[1000px] bg-blue-600/10 rounded-full blur-[150px] pointer-events-none z-0"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[1000px] h-[1000px] bg-cyan-500/5 rounded-full blur-[150px] pointer-events-none z-0"></div>
+        <div className="absolute top-[-20%] left-[-10%] w-[1000px] h-[1000px] bg-blue-600/10 rounded-full blur-[150px] pointer-events-none z-0" aria-hidden="true"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[1000px] h-[1000px] bg-cyan-500/5 rounded-full blur-[150px] pointer-events-none z-0" aria-hidden="true"></div>
 
         <Sidebar />
         
         <div className="flex-1 flex flex-col min-w-0 relative z-10">
           <Header />
-          <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 pr-6 pb-6 no-scrollbar">
+          <main id="main-content" aria-label="Dashboard content" className="flex-1 overflow-y-auto overflow-x-hidden p-4 pr-6 pb-6 no-scrollbar">
             {children}
           </main>
         </div>
