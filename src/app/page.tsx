@@ -1,3 +1,5 @@
+"use client";
+
 import { TopKPIs } from "@/components/dashboard/TopKPIs";
 import dynamic from "next/dynamic";
 

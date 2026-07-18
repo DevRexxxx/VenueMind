@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 
 const DigitalTwin = dynamic(() => import("@/components/dashboard/DigitalTwin").then(mod => mod.DigitalTwin), { ssr: false });
