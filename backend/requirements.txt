@@ -25,7 +25,7 @@ cryptography==49.0.0
 daphne==4.2.2
 distro==1.9.0
 dj-database-url==3.1.2
-Django==6.0.7
+Django==5.2.16
 django-cors-headers==4.9.0
 djangorestframework==3.17.1
 frozenlist==1.8.0
