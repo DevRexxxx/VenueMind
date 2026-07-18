@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Send, Sparkles } from "lucide-react";
+import { API_BASE_URL } from "@/lib/utils";
 
 export function CommandAssistant() {
   const [query, setQuery] = useState("");
@@ -11,7 +12,7 @@ export function CommandAssistant() {
     if (!query.trim()) return;
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/agent-query/", {
+      const res = await fetch(`${API_BASE_URL}/agent-query/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query }),

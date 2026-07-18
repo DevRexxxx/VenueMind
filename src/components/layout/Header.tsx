@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Cloud, Trophy, Activity, User, Sun, CloudRain } from "lucide-react";
+import { WS_BASE_URL } from "@/lib/utils";
 
 export function Header() {
   const [time, setTime] = useState("");
@@ -25,7 +26,7 @@ export function Header() {
 
     // WebSocket connection
     const connectWs = () => {
-      ws.current = new WebSocket('ws://127.0.0.1:8000/ws/dashboard/');
+      ws.current = new WebSocket(`${WS_BASE_URL}/dashboard/`);
       ws.current.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Brain, Activity, ShieldAlert, CloudRain, Users, Accessibility, Search, AlertCircle, ShoppingCart, X, Settings2, SlidersHorizontal, Cpu } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, API_BASE_URL } from "@/lib/utils";
 
 const AGENTS = [
   { name: "Orchestrator", icon: Brain, color: "text-[#0ea5e9]", bg: "bg-[#0ea5e9]/10", border: "border-[#0ea5e9]/20", role: "Central Routing & Synthesis", status: "Online", load: "42%" },
@@ -31,7 +31,7 @@ export default function AgentsPage() {
     // Fetch current config for this agent
     try {
       const agentId = agent.name.split(' ')[0]; // e.g., 'Security', 'Medical'
-      const res = await fetch(`http://127.0.0.1:8000/api/agent-config/${agentId}/`);
+      const res = await fetch(`${API_BASE_URL}/agent-config/${agentId}/`);
       if (res.ok) {
         const data = await res.json();
         setAutonomyLevel(data.autonomy_level);
@@ -62,7 +62,7 @@ export default function AgentsPage() {
         confidence_threshold: confidence
       };
       
-      const res = await fetch(`http://127.0.0.1:8000/api/agent-config/${agentId}/`, {
+      const res = await fetch(`${API_BASE_URL}/agent-config/${agentId}/`, {
         method: 'PUT', // Try PUT first
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -70,7 +70,7 @@ export default function AgentsPage() {
       
       if (res.status === 404) {
         // If not found, create it via POST
-        await fetch(`http://127.0.0.1:8000/api/agent-config/`, {
+        await fetch(`${API_BASE_URL}/agent-config/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Users, AlertTriangle, MessageSquare, Shield, Activity, Sun, ShieldAlert } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, API_BASE_URL } from "@/lib/utils";
 
 const INITIAL_AGENTS = [
   { id: "crowd", label: "Crowd Agent", icon: Users, status: "Healthy", color: "green" },
@@ -20,7 +20,7 @@ export function AgentNetwork() {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/agent-status/");
+        const res = await fetch(`${API_BASE_URL}/agent-status/`);
         if (res.ok) {
           const liveData = await res.json();
           // Merge live data with icons

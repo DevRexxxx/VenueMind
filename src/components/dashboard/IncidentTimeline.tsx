@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { AlertCircle, ShieldAlert, CheckCircle2, MessageSquareText, ThumbsUp, ThumbsDown, Brain } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import useWebSocket from "react-use-websocket";
-import { cn } from "@/lib/utils";
+import { cn, API_BASE_URL, WS_BASE_URL } from "@/lib/utils";
 
 interface Incident {
   id?: number;
@@ -26,7 +26,7 @@ export function IncidentTimeline() {
   useEffect(() => {
     const fetchIncidents = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/incidents/");
+        const res = await fetch(`${API_BASE_URL}/incidents/`);
         if (res.ok) {
           const data = await res.json();
           setIncidents(data.reverse()); // latest first
@@ -39,7 +39,7 @@ export function IncidentTimeline() {
   }, []);
 
   // Listen for WebSocket updates
-  const { lastJsonMessage } = useWebSocket('ws://localhost:8000/ws/dashboard/', {
+  const { lastJsonMessage } = useWebSocket(`${WS_BASE_URL}/dashboard/`, {
     shouldReconnect: () => true,
   });
 
