@@ -11,7 +11,7 @@ test.describe('VenueMind Dashboard', () => {
     await expect(page.locator('header[role="banner"]')).toBeVisible();
 
     // Check if the Digital Twin renders
-    await expect(page.locator('text="Live Crowd Density"')).toBeVisible();
+    await expect(page.locator('text="Live Stadium Digital Twin"')).toBeVisible();
 
     // Check if the Agent Network renders
     await expect(page.locator('text="AI Agent Network"')).toBeVisible();
