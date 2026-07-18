@@ -108,6 +108,6 @@ test.describe('VenueMind Dashboard', () => {
     await expect(timeline).toBeVisible();
     
     // Wait for at least one mock incident to appear
-    await expect(timeline.locator('.flex.gap-4').first()).toBeVisible({ timeout: 10000 });
+    await expect(timeline.locator('.p-3.rounded-lg').first()).toBeVisible({ timeout: 10000 });
   });
 });
