@@ -35,6 +35,12 @@ test.describe('VenueMind Dashboard', () => {
       });
     });
 
+    let dashboardWs: any;
+
+    await page.routeWebSocket('**/dashboard/', ws => {
+      dashboardWs = ws;
+    });
+
     await page.route('**/agent-query/', async (route) => {
       // Simulate network delay so 'isThinking' stays visible long enough for Playwright
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -43,6 +49,10 @@ test.describe('VenueMind Dashboard', () => {
         contentType: 'application/json',
         body: JSON.stringify({ message: "Task accepted" })
       });
+      // Fire the WebSocket message back to the client to clear the thinking state
+      if (dashboardWs) {
+        dashboardWs.send(JSON.stringify({ type: 'ai_response', message: 'Mock Orchestrator response' }));
+      }
     });
 
     // Assuming the app runs on localhost:3000 during tests
