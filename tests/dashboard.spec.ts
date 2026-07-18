@@ -16,6 +16,9 @@ test.describe('VenueMind Dashboard', () => {
     // Check if the Agent Network renders
     await expect(page.locator('text="AI Agent Network"')).toBeVisible();
 
+    // Check if the ROI Metrics renders
+    await expect(page.locator('text="Business Viability & ROI"')).toBeVisible();
+
     // Check if the Command Assistant renders
     const copilotInput = page.getByPlaceholder(/Command Orchestrator/i);
     await expect(copilotInput).toBeVisible();

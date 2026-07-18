@@ -8,6 +8,7 @@ import { VolunteerDispatch } from "@/components/dashboard/VolunteerDispatch";
 import { TransportOverview } from "@/components/dashboard/TransportOverview";
 import { SystemLogs } from "@/components/dashboard/SystemLogs";
 import { CommandAssistant } from "@/components/dashboard/CommandAssistant";
+import { ROIMetrics } from "@/components/dashboard/ROIMetrics";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export default function Home() {
@@ -54,6 +55,13 @@ export default function Home() {
         <div className="col-span-12 md:col-span-6 xl:col-span-3 h-full">
           <TransportOverview />
         </div>
+      </div>
+
+      {/* ROI Row */}
+      <div className="shrink-0 mb-4">
+        <ErrorBoundary fallbackName="ROI Metrics">
+          <ROIMetrics />
+        </ErrorBoundary>
       </div>
 
       {/* Footer: System Logs & AI Copilot */}
