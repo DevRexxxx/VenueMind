@@ -2,6 +2,47 @@ import { test, expect } from '@playwright/test';
 
 test.describe('VenueMind Dashboard', () => {
   test.beforeEach(async ({ page }) => {
+    // Mock the API responses to prevent "Failed to fetch" errors when the backend is offline
+    await page.route('**/agent-status/', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: "crowd", label: "Crowd Agent", status: "Healthy", color: "green" }
+        ])
+      });
+    });
+
+    await page.route('**/incidents/', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          count: 1,
+          next: null,
+          previous: null,
+          results: [
+            {
+              id: 1,
+              type: "test",
+              description: "Mock incident",
+              severity: "low",
+              status: "active",
+              created_at: new Date().toISOString()
+            }
+          ]
+        })
+      });
+    });
+
+    await page.route('**/orchestrator/', async (route) => {
+      await route.fulfill({
+        status: 202,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: "Task accepted" })
+      });
+    });
+
     // Assuming the app runs on localhost:3000 during tests
     await page.goto('http://localhost:3000');
   });
