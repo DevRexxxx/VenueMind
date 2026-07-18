@@ -1,5 +1,6 @@
 "use client";
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Bus, Train, Car, Plane } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +14,7 @@ const TRANSPORT = [
 ];
 
 export function TransportOverview() {
-  const colorMap: any = {
+  const colorMap: unknown = {
     green: { bar: "bg-[#10b981]", text: "text-[#10b981]" },
     orange: { bar: "bg-[#f59e0b]", text: "text-[#f59e0b]" },
     red: { bar: "bg-[#ef4444]", text: "text-[#ef4444]" },

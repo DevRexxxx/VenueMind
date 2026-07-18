@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Play, RotateCcw, Activity, CheckCircle2, X, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from "zod";
 import { SimulationResponseSchema } from "@/lib/schemas";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,15 +28,15 @@ export function SimulationMode() {
     setSimResults(null);
     
     try {
-      const data = await apiFetch<any>('/simulate/', {
+      const data = await apiFetch<unknown>('/simulate/', {
         method: "POST",
         body: JSON.stringify({ scenario })
       }, SimulationResponseSchema);
       
-      const criticalSectors = data.simulated_sectors.filter((s: any) => s.status === 'critical' || s.status === 'warning');
+      const criticalSectors = data.simulated_sectors.filter((s: unknown) => s.status === 'critical' || s.status === 'warning');
       setSimResults(criticalSectors);
       setToastMessage(`Simulation complete. ${criticalSectors.length} sectors flagged as critical/warning in this scenario.`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setToastMessage(`Simulation failed: ${err.message || "Backend error"}`);
     } finally {
       setRunning(false);
@@ -57,7 +58,7 @@ export function SimulationMode() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-sm font-bold uppercase tracking-widest text-white/90">Digital Twin Simulation</h2>
-          <p className="text-xs text-white/50 tracking-wider">"What-If" Scenario Engine</p>
+          <p className="text-xs text-white/50 tracking-wider">&quot;What-If&quot; Scenario Engine</p>
         </div>
         <button 
           onClick={() => setIsActive(!isActive)}

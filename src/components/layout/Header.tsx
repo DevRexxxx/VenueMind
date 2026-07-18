@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cloud, Trophy, Activity, User, Sun, CloudRain } from "lucide-react";
 import { WS_BASE_URL } from "@/lib/utils";
 

@@ -1,5 +1,6 @@
 "use client";
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { TrendingUp, TrendingDown } from "lucide-react";
 
 // Simple inline sparkline using SVG

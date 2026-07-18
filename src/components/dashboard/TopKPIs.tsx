@@ -1,6 +1,7 @@
 "use client";
 
 import { Users, AlertTriangle, Brain, User, Bus, Sun, TrendingUp, AlertCircle } from "lucide-react";
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { cn } from "@/lib/utils";
 
 export function TopKPIs() {

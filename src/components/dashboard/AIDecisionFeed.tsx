@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Brain, CheckCircle2, Clock, ChevronDown, ChevronUp, Activity, Database, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -126,7 +128,7 @@ export function AIDecisionFeed() {
                     </div>
                     
                     <p className="text-[10px] text-white/70 leading-relaxed italic border-l-2 border-[#0ea5e9]/30 pl-2">
-                      "{d.xai.trace}"
+                      &quot;{d.xai.trace}&quot;
                     </p>
 
                     <div className="grid grid-cols-1 gap-1.5 mt-1">

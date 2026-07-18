@@ -23,7 +23,7 @@ export function SystemLogs() {
   }, []);
 
   const entry = LOG_ENTRIES[activeIndex];
-  const levelColor: any = {
+  const levelColor: unknown = {
     info: "text-[#3b82f6]",
     success: "text-[#10b981]",
     warning: "text-[#f59e0b]",

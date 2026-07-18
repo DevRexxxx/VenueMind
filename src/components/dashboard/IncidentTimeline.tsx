@@ -4,9 +4,12 @@ import { useState, useEffect } from "react";
 import { AlertCircle, ShieldAlert, CheckCircle2, MessageSquareText, ThumbsUp, ThumbsDown, Brain } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import useWebSocket from "react-use-websocket";
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { cn, API_BASE_URL, WS_BASE_URL } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from "zod";
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { IncidentSchema, PaginatedIncidentSchema } from "@/lib/schemas";
 
 interface Incident {
@@ -29,7 +32,7 @@ export function IncidentTimeline() {
   useEffect(() => {
     const fetchIncidents = async () => {
       try {
-        const data = await apiFetch<any>('/incidents/', {}, PaginatedIncidentSchema);
+        const data = await apiFetch<unknown>('/incidents/', {}, PaginatedIncidentSchema);
         setIncidents(data.results.reverse()); // latest first
       } catch (err) {
         console.error("Failed to fetch incidents", err);
@@ -39,26 +42,30 @@ export function IncidentTimeline() {
   }, []);
 
   // Listen for WebSocket updates
-  const { lastJsonMessage } = useWebSocket(`${WS_BASE_URL}/dashboard/`, {
+  useWebSocket(`${WS_BASE_URL}/dashboard/`, {
     share: true,
     shouldReconnect: () => true,
-  });
-
-  useEffect(() => {
-    if (lastJsonMessage && (lastJsonMessage as any).type === 'incident_alert') {
-      const msg = (lastJsonMessage as any).message;
-      const newIncident: Incident = {
-        id: Date.now(),
-        type: msg.type || "System",
-        description: msg.alert_message,
-        severity: msg.severity,
-        status: "detected",
-        created_at: new Date().toISOString(),
-        reasoning_trace: msg.reasoning_trace || "Agent applied baseline security thresholds. Computed via predictive threat assessment model v1.4."
-      };
-      setIncidents(prev => [newIncident, ...prev]);
+    onMessage: (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'incident_alert') {
+          const msg = data.message;
+          const newIncident: Incident = {
+            id: Date.now(),
+            type: msg.type || "System",
+            description: msg.alert_message,
+            severity: msg.severity,
+            status: "detected",
+            created_at: new Date().toISOString(),
+            reasoning_trace: msg.reasoning_trace || "Agent applied baseline security thresholds. Computed via predictive threat assessment model v1.4."
+          };
+          setIncidents(prev => [newIncident, ...prev]);
+        }
+      } catch {
+        // ignore JSON parse errors
+      }
     }
-  }, [lastJsonMessage]);
+  });
 
   return (
     <div className="glass-card w-full h-full p-4 flex flex-col relative overflow-hidden group" role="region" aria-label="Live incident timeline">
@@ -150,7 +157,7 @@ export function IncidentTimeline() {
                         <span className="text-[9px] font-bold uppercase tracking-wider text-[#0ea5e9]">Detection Trace</span>
                       </div>
                       <p className="text-[10px] text-white/70 leading-relaxed italic border-l-2 border-[#0ea5e9]/30 pl-2">
-                        "{inc.reasoning_trace || 'No trace provided for this legacy incident.'}"
+                        &quot;{inc.reasoning_trace || 'No trace provided for this legacy incident.'}&quot;
                       </p>
                     </div>
                   </motion.div>

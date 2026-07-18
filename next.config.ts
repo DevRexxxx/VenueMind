@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' http://localhost:8000 ws://localhost:8000 https://venue-mind.onrender.com wss://venue-mind.onrender.com; font-src 'self' data:; frame-ancestors 'none';"
+            value: `default-src 'self'; script-src 'self' ${process.env.NODE_ENV === 'production' ? '' : "'unsafe-eval'"} 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' http://localhost:8000 ws://localhost:8000 https://venue-mind.onrender.com wss://venue-mind.onrender.com; font-src 'self' data:; frame-ancestors 'none';`
           },
           {
             key: 'X-Frame-Options',

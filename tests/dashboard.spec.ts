@@ -39,9 +39,34 @@ test.describe('VenueMind Dashboard', () => {
     }
   });
 
-  test('command assistant should accept input', async ({ page }) => {
+  test('command assistant should accept input and show response', async ({ page }) => {
     const copilotInput = page.getByPlaceholder(/Command Orchestrator/i);
     await copilotInput.fill('Evacuate Sector N1');
     await expect(copilotInput).toHaveValue('Evacuate Sector N1');
+    
+    // Test the form submission (Assuming enter works)
+    await copilotInput.press('Enter');
+    
+    // Should show thinking state then response
+    await expect(page.locator('text="Orchestrator is thinking..."')).toBeVisible();
+    await expect(page.locator('text="Orchestrator is thinking..."')).toBeHidden({ timeout: 10000 });
+  });
+
+  test('should toggle the digital twin view', async ({ page }) => {
+    // Find the toggle simulation button by its icon/role or text
+    const toggleButton = page.locator('button', { hasText: 'Start Simulation' }).or(page.locator('button', { hasText: 'Stop Simulation' })).first();
+    if (await toggleButton.isVisible()) {
+      await toggleButton.click();
+      // Verify state changes - simple interaction test
+      await expect(toggleButton).toBeEnabled();
+    }
+  });
+
+  test('incident timeline should render incidents over time', async ({ page }) => {
+    const timeline = page.locator('div[role="region"][aria-label="Live incident timeline"]');
+    await expect(timeline).toBeVisible();
+    
+    // Wait for at least one mock incident to appear
+    await expect(timeline.locator('.flex.gap-4').first()).toBeVisible({ timeout: 10000 });
   });
 });

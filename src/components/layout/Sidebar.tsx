@@ -51,6 +51,7 @@ export function Sidebar() {
         <button 
           onClick={() => setIsExpanded(!isExpanded)}
           aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+          aria-expanded={isExpanded}
           className="p-1.5 rounded-lg hover:bg-white/10 transition-colors text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
         >
           {isExpanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}

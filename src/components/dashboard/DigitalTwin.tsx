@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+   
+   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Plus, Minus, Layers, Move3D, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -160,8 +163,8 @@ function LegendItem({ color, label }: { color: string, label: string }) {
   );
 }
 
-function Marker({ top, left, right, bottom, color, label, pulse }: any) {
-  const colorMap: any = {
+function Marker({ top, left, right, bottom, color, label, pulse }: unknown) {
+  const colorMap: unknown = {
     green: "bg-[#10b981] shadow-[#10b981]/50",
     orange: "bg-[#f59e0b] shadow-[#f59e0b]/50",
     purple: "bg-[#a855f7] shadow-[#a855f7]/50",

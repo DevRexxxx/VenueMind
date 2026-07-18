@@ -38,7 +38,7 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}, s
   if (schema) {
     try {
       return schema.parse(data);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(`Zod validation failed for ${endpoint}:`, e);
       throw new Error(`Invalid data format received from API for ${endpoint}.`);
     }

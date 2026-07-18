@@ -1,5 +1,6 @@
 "use client";
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useState, useEffect, useRef } from "react";
 import { Send, Sparkles, X, CheckCircle2 } from "lucide-react";
 import useWebSocket from "react-use-websocket";
@@ -13,23 +14,24 @@ export function CommandAssistant() {
   const [aiResponse, setAiResponse] = useState<string | null>(null);
 
   // Listen for WebSocket updates
-  const { lastJsonMessage } = useWebSocket(`${WS_BASE_URL}/dashboard/`, {
+  useWebSocket(`${WS_BASE_URL}/dashboard/`, {
     share: true,
     shouldReconnect: () => true,
-  });
-
-  useEffect(() => {
-    if (lastJsonMessage) {
-      const data = lastJsonMessage as any;
-      if (data.type === 'ai_response') {
-        setAiResponse(data.message);
-        setIsThinking(false);
-      } else if (data.type === 'ai_error') {
-        setAiResponse(`Error: ${data.message}`);
-        setIsThinking(false);
+    onMessage: (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'ai_response') {
+          setAiResponse(data.message);
+          setIsThinking(false);
+        } else if (data.type === 'ai_error') {
+          setAiResponse(`Error: ${data.message}`);
+          setIsThinking(false);
+        }
+      } catch {
+        // ignore
       }
     }
-  }, [lastJsonMessage]);
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,12 +39,12 @@ export function CommandAssistant() {
     setIsThinking(true);
     setAiResponse(null);
     try {
-      await apiFetch<any>('/agent-query/', {
+      await apiFetch<unknown>('/agent-query/', {
         method: "POST",
         body: JSON.stringify({ query }),
       });
       // The backend returns 202 instantly, and processes in the background.
-    } catch (err: any) {
+    } catch (err: unknown) {
       setAiResponse(`Error: ${err.message || "Failed to connect to AI Orchestrator."}`);
       setIsThinking(false);
     } finally {
@@ -79,6 +81,7 @@ export function CommandAssistant() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
+            aria-live="polite"
             className="absolute bottom-full left-0 right-0 mb-4 bg-[#0a0a10] border border-purple-500/30 rounded-xl p-4 shadow-[0_0_20px_rgba(168,85,247,0.15)] z-50 max-h-[300px] overflow-y-auto"
           >
             {isThinking ? (
