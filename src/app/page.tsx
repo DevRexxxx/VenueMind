@@ -1,14 +1,16 @@
 import { TopKPIs } from "@/components/dashboard/TopKPIs";
-import { DigitalTwin } from "@/components/dashboard/DigitalTwin";
-import { AgentNetwork } from "@/components/dashboard/AgentNetwork";
-import { IncidentTimeline } from "@/components/dashboard/IncidentTimeline";
+import dynamic from "next/dynamic";
+
+const DigitalTwin = dynamic(() => import("@/components/dashboard/DigitalTwin").then(mod => mod.DigitalTwin), { ssr: false });
+const AgentNetwork = dynamic(() => import("@/components/dashboard/AgentNetwork").then(mod => mod.AgentNetwork), { ssr: false });
+const IncidentTimeline = dynamic(() => import("@/components/dashboard/IncidentTimeline").then(mod => mod.IncidentTimeline), { ssr: false });
 import { BottomAnalytics } from "@/components/dashboard/BottomAnalytics";
 import { AIDecisionFeed } from "@/components/dashboard/AIDecisionFeed";
 import { VolunteerDispatch } from "@/components/dashboard/VolunteerDispatch";
 import { TransportOverview } from "@/components/dashboard/TransportOverview";
 import { SystemLogs } from "@/components/dashboard/SystemLogs";
-import { CommandAssistant } from "@/components/dashboard/CommandAssistant";
-import { ROIMetrics } from "@/components/dashboard/ROIMetrics";
+const CommandAssistant = dynamic(() => import("@/components/dashboard/CommandAssistant").then(mod => mod.CommandAssistant), { ssr: false });
+const ROIMetrics = dynamic(() => import("@/components/dashboard/ROIMetrics").then(mod => mod.ROIMetrics), { ssr: false });
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export default function Home() {

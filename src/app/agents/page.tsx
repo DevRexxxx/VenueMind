@@ -56,11 +56,20 @@ export default function BentoChatPage() {
         {BENTO_CARDS.map((card, i) => (
           <motion.div
             key={i}
+            tabIndex={0}
+            role="button"
+            aria-label={`View ${card.name}`}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setInput(`Tell me more about ${card.name}`);
+              }
+            }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
             className={cn(
-              "glass-card p-4 rounded-3xl flex flex-col gap-2 justify-between group hover:shadow-[0_0_30px_rgba(255,93,0,0.1)] transition-all cursor-pointer border border-white/5 hover:border-white/20 bg-black/40 backdrop-blur-xl",
+              "glass-card p-4 rounded-3xl flex flex-col gap-2 justify-between group hover:shadow-[0_0_30px_rgba(255,93,0,0.1)] transition-all cursor-pointer border border-white/5 hover:border-white/20 bg-black/40 backdrop-blur-xl focus:outline-none focus:ring-2 focus:ring-[#FF5D00]/50",
               card.colSpan
             )}
           >
