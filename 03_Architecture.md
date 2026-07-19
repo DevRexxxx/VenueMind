@@ -19,6 +19,46 @@
 
 ## 2. High-Level Layered View
 
+```mermaid
+graph TD
+    %% Styling
+    classDef frontend fill:#1e1e1e,stroke:#FF5D00,stroke-width:2px,color:#fff;
+    classDef backend fill:#0D0101,stroke:#61dafb,stroke-width:2px,color:#fff;
+    classDef database fill:#003b5c,stroke:#4479A1,stroke-width:2px,color:#fff;
+    classDef agents fill:#2e0b3c,stroke:#a64d79,stroke-width:2px,color:#fff;
+
+    %% Nodes
+    subgraph Frontend [Presentation Layer - Next.js]
+        DT[Digital Twin]:::frontend
+        AN[Agent Network]:::frontend
+        CA[Command Assistant]:::frontend
+    end
+
+    subgraph API [Backend API Layer - Django/DRF]
+        GW[API Gateway]:::backend
+        Auth[Authentication]:::backend
+        WS[Channels WebSockets]:::backend
+    end
+
+    subgraph Orchestration [Agent Orchestration - LangGraph/Celery]
+        ORCH((Orchestrator Agent)):::agents
+        CAg[Crowd Agent]:::agents
+        TAg[Traffic Agent]:::agents
+        SAg[Security Agent]:::agents
+        MAg[Medical Agent]:::agents
+    end
+
+    subgraph Data [Ground-Truth Data - MySQL]
+        DB[(Stadium DB)]:::database
+    end
+
+    %% Connections
+    Frontend <-->|WebSockets & REST| API
+    API <-->|Celery Tasks| Orchestration
+    ORCH <--> CAg & TAg & SAg & MAg
+    Orchestration <-->|Tool Calls| Data
+```
+
 1. **Data Source Layer** — turnstiles/access control, public transit APIs, weather feeds, CCTV/computer-vision analytics, SMS/app fan and staff reports, staff radio/dispatch, POS/inventory systems.
 2. **Ingestion & Normalization Layer** — collectors and API gateways that normalize heterogeneous feeds into a consistent internal event format, buffered through a message queue.
 3. **Ground-Truth Data Layer (MySQL)** — the authoritative store of stadium blueprints, staff rosters, inventory logs, incident history, and crowd-flow history, described in the TRD's data model.
