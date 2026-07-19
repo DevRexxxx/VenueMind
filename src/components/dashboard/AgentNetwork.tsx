@@ -86,7 +86,7 @@ export function AgentNetwork() {
       </div>
 
       {/* List */}
-      <div className="flex-1 flex flex-col gap-2 overflow-y-auto no-scrollbar">
+      <div className="flex-1 flex flex-col gap-2 overflow-y-auto no-scrollbar" tabIndex={0}>
         {agents.map((agent) => {
           const style = colorMap[agent.color];
           return (

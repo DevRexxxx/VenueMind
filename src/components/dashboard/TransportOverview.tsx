@@ -29,7 +29,7 @@ export function TransportOverview() {
       </div>
 
       {/* Bars */}
-      <div className="flex-1 flex flex-col gap-2.5 overflow-y-auto no-scrollbar">
+      <div className="flex-1 flex flex-col gap-2.5 overflow-y-auto no-scrollbar" tabIndex={0}>
         {TRANSPORT.map((t) => {
           const style = colorMap[t.color];
           return (

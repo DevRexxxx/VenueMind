@@ -82,7 +82,7 @@ export function AIDecisionFeed() {
       </div>
 
       {/* Feed */}
-      <div className="flex-1 flex flex-col gap-2.5 overflow-y-auto no-scrollbar pr-1">
+      <div className="flex-1 flex flex-col gap-2.5 overflow-y-auto no-scrollbar pr-1" tabIndex={0}>
         {DECISIONS.map((d) => (
           <div key={d.id} className="p-2.5 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
             

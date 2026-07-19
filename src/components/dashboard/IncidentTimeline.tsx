@@ -79,7 +79,7 @@ export function IncidentTimeline() {
       </div>
 
       {/* Timeline */}
-      <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pr-1">
+      <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pr-1" tabIndex={0}>
         {incidents.map((inc, i) => {
           const uniqueId = inc.id || i;
           const timeStr = inc.created_at ? new Date(inc.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : (inc.time || "Now");

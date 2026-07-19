@@ -23,7 +23,7 @@ export function VolunteerDispatch() {
       </div>
 
       {/* List */}
-      <div className="flex-1 flex flex-col gap-2 overflow-y-auto no-scrollbar">
+      <div className="flex-1 flex flex-col gap-2 overflow-y-auto no-scrollbar" tabIndex={0}>
         {VOLUNTEERS.map((v) => (
           <div key={v.id} className="flex items-center justify-between p-2 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
             <div className="flex items-center gap-2.5">
