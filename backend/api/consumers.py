@@ -1,15 +1,17 @@
 import json
 import asyncio
-import random
 import aiohttp
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from django.conf import settings as django_settings
 from django.core.cache import cache
-from datetime import datetime
 from api.models import Incident, Alert, AgentConfig
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_wmo_weather_condition(code):
-    # Map WMO weather codes to our conditions
+    """Map a WMO weather interpretation code to a human-readable condition string."""
     if code == 0:
         return "Clear Sky"
     elif code in [1, 2, 3]:
@@ -24,7 +26,14 @@ def get_wmo_weather_condition(code):
         return "Thunderstorm"
     return "Clear Sky"
 
+
 class DashboardConsumer(AsyncWebsocketConsumer):
+    """WebSocket consumer for real-time dashboard updates.
+
+    Manages a single shared group (``dashboard_updates``) and spawns
+    a per-connection asyncio task that delivers live weather, system
+    status, and agent network data every 5 seconds.
+    """
     async def connect(self):
         # We join a global group for dashboard updates
         self.group_name = "dashboard_updates"
@@ -83,15 +92,7 @@ class DashboardConsumer(AsyncWebsocketConsumer):
             })
 
         if not agents:
-            agents = [
-                {"id": "crowd", "label": "Crowd Agent", "type": "Crowd"},
-                {"id": "gate", "label": "Gate Agent", "type": "System"},
-                {"id": "comm", "label": "Communication Agent", "type": "System"},
-                {"id": "security", "label": "Security Agent", "type": "Security"},
-                {"id": "medical", "label": "Medical Agent", "type": "Medical"},
-                {"id": "weather", "label": "Weather Agent", "type": "Weather"},
-                {"id": "emergency", "label": "Emergency Agent", "type": "System"},
-            ]
+            agents = list(django_settings.DEFAULT_AGENT_STATUSES)
             
         active_incidents = Incident.objects.exclude(status='resolved')
         
@@ -143,8 +144,7 @@ class DashboardConsumer(AsyncWebsocketConsumer):
                                     # Cache for 5 minutes (300 seconds)
                                     cache.set("live_weather_data", {"temp": weather_temp, "condition": weather_condition}, 300)
                     except Exception as e:
-                        print("Error fetching weather:", e)
-                        pass
+                        logger.warning("Error fetching live weather: %s", e)
 
                 # Query database for real system status
                 system_status = await self.get_system_status()

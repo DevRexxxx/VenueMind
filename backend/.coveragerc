@@ -1,0 +1,14 @@
+[run]
+source = api
+omit =
+    api/agents/*
+    api/consumers.py
+    api/routing.py
+
+[report]
+fail_under = 85
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:

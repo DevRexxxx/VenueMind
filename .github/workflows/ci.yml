@@ -26,13 +26,23 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r backend/requirements.txt
         
-    - name: Run Django Tests
+    - name: Run Django Tests with Coverage
       env:
         SECRET_KEY: 'django-insecure-ci-test-key'
         GROQ_API_KEY: 'dummy_key'
       run: |
         cd backend
-        python manage.py test api -v 2
+        python -m coverage run --source='api' manage.py test api -v 2
+        python -m coverage report --fail-under=85
+        python -m coverage xml -o coverage.xml
+
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: backend-coverage-py${{ matrix.python-version }}
+        path: backend/coverage.xml
+        retention-days: 7
 
   frontend-build:
     runs-on: ubuntu-latest

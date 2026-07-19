@@ -1,17 +1,13 @@
 import os
 import logging
 
-from django.db.models import Count
+from django.conf import settings as django_settings
+from django.db.models import Count, F
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated, IsAdminUser
-from rest_framework.throttling import AnonRateThrottle
-import threading
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, IsAdminUser
+from rest_framework.throttling import UserRateThrottle
 from .models import (
     Stadium, Sector, Gate, Staff, Incident, Alert, Asset, CrowdMetricSnapshot,
     AgentFeedback, ModelVersion, SustainabilityMetric, IncidentBiasAudit, AgentConfig
@@ -22,7 +18,6 @@ from .serializers import (
     AgentFeedbackSerializer, ModelVersionSerializer, SustainabilityMetricSerializer,
     IncidentBiasAuditSerializer, AgentConfigSerializer
 )
-from .agents.graph import invoke_agent_network
 from .services import SimulationService
 
 logger = logging.getLogger(__name__)
@@ -96,7 +91,7 @@ class AgentConfigViewSet(viewsets.ModelViewSet):
 
 
 # --- Custom rate limiter for AI queries ---
-class AgentQueryThrottle(AnonRateThrottle):
+class AgentQueryThrottle(UserRateThrottle):
     """Stricter rate limit for AI Orchestrator queries to prevent abuse."""
     rate = '10/minute'
 
@@ -104,9 +99,12 @@ class AgentQueryThrottle(AnonRateThrottle):
 class AgentQueryView(APIView):
     """
     Endpoint to send a natural language query to the LangGraph AI Orchestrator.
+
+    Secured: Requires authentication.
     Rate-limited and input-validated.
+    Async processing is delegated to Celery to avoid unmanaged threads.
     """
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     throttle_classes = [AgentQueryThrottle]
 
     MAX_QUERY_LENGTH = 500
@@ -129,43 +127,21 @@ class AgentQueryView(APIView):
                 {"error": "Groq API key is missing. Please add GROQ_API_KEY to your Render Environment Variables to use the AI features for free."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        
-        def process_llm_query(q):
-            try:
-                response_text = invoke_agent_network(q)
-                channel_layer = get_channel_layer()
-                async_to_sync(channel_layer.group_send)(
-                    "dashboard_updates",
-                    {
-                        "type": "dashboard_update",
-                        "update_type": "ai_response",
-                        "message": response_text
-                    }
-                )
-            except Exception as e:
-                logger.exception("Agent query failed for input length=%d", len(q))
-                channel_layer = get_channel_layer()
-                async_to_sync(channel_layer.group_send)(
-                    "dashboard_updates",
-                    {
-                        "type": "dashboard_update",
-                        "update_type": "ai_error",
-                        "message": "An internal error occurred while processing your query."
-                    }
-                )
 
-        # Spawn a background thread so we don't block the HTTP request
-        thread = threading.Thread(target=process_llm_query, args=(query,))
-        thread.start()
+        # Delegate to Celery task instead of spawning a raw thread
+        from .tasks import process_llm_query_task
+        process_llm_query_task.delay(query)
 
         return Response({"status": "processing", "message": "Query received. Analyzing..."}, status=status.HTTP_202_ACCEPTED)
 
 class SimulateView(APIView):
     """
     Endpoint for Digital Twin "What-If" Simulation Engine.
+
+    Secured: Requires authentication.
     Accepts scenarios like 'gate_closure' or 'surge' and returns updated sector densities.
     """
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     VALID_SCENARIOS = ['gate_closure', 'surge', 'evacuation']
 
@@ -189,7 +165,7 @@ class AgentStatusView(APIView):
     """
     Endpoint to get live status of agents based on active incidents in the database.
     """
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
         # Fetch active agents dynamically from configuration
@@ -206,17 +182,9 @@ class AgentStatusView(APIView):
                 "type": agent_type
             })
 
-        # Fallback if DB is empty
+        # Fallback to default agents from settings if DB is empty
         if not agents:
-            agents = [
-                {"id": "crowd", "label": "Crowd Agent", "type": "Crowd"},
-                {"id": "gate", "label": "Gate Agent", "type": "System"},
-                {"id": "comm", "label": "Communication Agent", "type": "System"},
-                {"id": "security", "label": "Security Agent", "type": "Security"},
-                {"id": "medical", "label": "Medical Agent", "type": "Medical"},
-                {"id": "weather", "label": "Weather Agent", "type": "Weather"},
-                {"id": "emergency", "label": "Emergency Agent", "type": "System"},
-            ]
+            agents = list(django_settings.DEFAULT_AGENT_STATUSES)
         
         # Check active incidents
         active_incidents = Incident.objects.exclude(status='resolved')
@@ -252,5 +220,64 @@ class AgentStatusView(APIView):
         return Response(results, status=status.HTTP_200_OK)
 
 
+class ROIMetricsView(APIView):
+    """
+    Endpoint for Business Viability & ROI metrics.
 
+    Aggregates key operational data from the database:
+    - Total incidents detected and resolved
+    - Average resolution time
+    - Staff utilisation rate
+    - AI agent feedback summary (trust score)
+    """
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
+    def get(self, request):
+        total_incidents = Incident.objects.count()
+        resolved_incidents = Incident.objects.filter(status='resolved').count()
+        active_incidents = Incident.objects.exclude(status='resolved').count()
+
+        # Prevention rate: resolved / total (if any exist)
+        prevention_rate = round((resolved_incidents / total_incidents * 100), 1) if total_incidents > 0 else 0.0
+
+        # Average resolution time — portable approach that works on both PostgreSQL and SQLite.
+        # Uses .only() to minimise column data fetched; aggregates the timedelta arithmetic
+        # in Python on the two datetime scalars rather than pulling full model instances.
+        resolved_qs = Incident.objects.filter(status='resolved', resolved_at__isnull=False)
+        resolved_count = resolved_qs.count()
+        avg_resolution = None
+        if resolved_count > 0:
+            total_seconds = sum(
+                (inc.resolved_at - inc.created_at).total_seconds()
+                for inc in resolved_qs.only('resolved_at', 'created_at')
+            )
+            avg_resolution = round(total_seconds / resolved_count, 1)
+
+        # Staff utilisation: active or busy staff / total staff
+        total_staff = Staff.objects.count()
+        active_staff = Staff.objects.filter(status__in=['active', 'busy']).count()
+        staff_utilisation = round((active_staff / total_staff * 100), 1) if total_staff > 0 else 0.0
+
+        # AI trust score: ratio of positive feedback
+        total_feedback = AgentFeedback.objects.count()
+        positive_feedback = AgentFeedback.objects.filter(rating='thumbs_up').count()
+        ai_trust_score = round((positive_feedback / total_feedback * 100), 1) if total_feedback > 0 else None
+
+        # Incidents by severity breakdown
+        severity_breakdown = dict(
+            Incident.objects.values_list('severity').annotate(count=Count('id')).values_list('severity', 'count')
+        )
+
+        return Response({
+            "total_incidents": total_incidents,
+            "resolved_incidents": resolved_incidents,
+            "active_incidents": active_incidents,
+            "prevention_rate_pct": prevention_rate,
+            "avg_resolution_time_seconds": avg_resolution,
+            "total_staff": total_staff,
+            "active_staff": active_staff,
+            "staff_utilisation_pct": staff_utilisation,
+            "ai_trust_score_pct": ai_trust_score,
+            "total_feedback": total_feedback,
+            "severity_breakdown": severity_breakdown,
+        }, status=status.HTTP_200_OK)

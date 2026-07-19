@@ -27,8 +27,8 @@ export function DigitalTwin() {
         {/* Left Toolbar */}
         <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-20">
           <div className="glass-card flex flex-col p-1 gap-1 border-white/10">
-            <button onClick={() => setView("2D")} aria-label="Switch to 2D view" className={cn("p-2 rounded-lg text-xs font-bold", view === "2D" ? "bg-[#3b82f6] text-white" : "text-white/50 hover:text-white hover:bg-white/5")}>2D</button>
-            <button onClick={() => setView("3D")} aria-label="Switch to 3D view" className={cn("p-2 rounded-lg text-xs font-bold", view === "3D" ? "bg-[#3b82f6] text-white" : "text-white/50 hover:text-white hover:bg-white/5")}>3D</button>
+            <button onClick={() => setView("2D")} aria-label="Switch to 2D view" className={cn("p-2 rounded-lg text-xs font-bold", view === "2D" ? "bg-[#2563eb] text-white" : "text-white/50 hover:text-white hover:bg-white/5")}>2D</button>
+            <button onClick={() => setView("3D")} aria-label="Switch to 3D view" className={cn("p-2 rounded-lg text-xs font-bold", view === "3D" ? "bg-[#2563eb] text-white" : "text-white/50 hover:text-white hover:bg-white/5")}>3D</button>
           </div>
           <div className="glass-card flex flex-col p-1 gap-1 border-white/10 mt-4">
             <button aria-label="Zoom in" className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/5"><Plus size={16} /></button>

@@ -3,7 +3,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (StadiumViewSet, SectorViewSet, GateViewSet, StaffViewSet, 
                     IncidentViewSet, AlertViewSet, AssetViewSet, CrowdMetricSnapshotViewSet,
                     AgentQueryView, AgentFeedbackViewSet, ModelVersionViewSet, 
-                    SustainabilityMetricViewSet, IncidentBiasAuditViewSet, SimulateView, AgentStatusView)
+                    SustainabilityMetricViewSet, IncidentBiasAuditViewSet, SimulateView,
+                    AgentStatusView, ROIMetricsView)
 
 router = DefaultRouter()
 router.register(r'stadiums', StadiumViewSet)
@@ -26,5 +27,7 @@ urlpatterns = [
     path('agent-query/', AgentQueryView.as_view(), name='agent-query'),
     path('simulate/', SimulateView.as_view(), name='simulate'),
     path('agent-status/', AgentStatusView.as_view(), name='agent-status'),
+    path('roi-metrics/', ROIMetricsView.as_view(), name='roi-metrics'),
     path('', include(router.urls)),
 ]
+

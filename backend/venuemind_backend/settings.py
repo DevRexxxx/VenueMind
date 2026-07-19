@@ -90,6 +90,18 @@ CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://127.0.0
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
+# Default agent statuses used as fallback when the AgentConfig table is empty.
+# Centralised here so both views.py and consumers.py reference one source of truth.
+DEFAULT_AGENT_STATUSES = [
+    {"id": "crowd", "label": "Crowd Agent", "type": "Crowd"},
+    {"id": "gate", "label": "Gate Agent", "type": "System"},
+    {"id": "comm", "label": "Communication Agent", "type": "System"},
+    {"id": "security", "label": "Security Agent", "type": "Security"},
+    {"id": "medical", "label": "Medical Agent", "type": "Medical"},
+    {"id": "weather", "label": "Weather Agent", "type": "Weather"},
+    {"id": "emergency", "label": "Emergency Agent", "type": "System"},
+]
+
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
@@ -101,7 +113,9 @@ DATABASES = {
 }
 
 
-# Django REST Framework — global settings
+# Django REST Framework — consolidated global settings.
+# NOTE: Previously split across two dicts; the second silently overwrote the first,
+# dropping permission classes and throttle rates. Now merged into one.
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
@@ -114,6 +128,9 @@ REST_FRAMEWORK = {
         'anon': '60/minute',
         'user': '120/minute',
     },
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 50,
 }
 
 
@@ -150,12 +167,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
-
-REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 50,
-}
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'VenueMind API',
