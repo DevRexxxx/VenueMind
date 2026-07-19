@@ -274,6 +274,6 @@ For detailed coding standards, refer to `06_System_Design_Rules.md`.
 ---
 
 <p align="center">
-  <strong>Built for the Future of Mega-Events</strong><br/>
+  <strong>Built with ❤️ for the Future of Mega-Events</strong><br/>
   <em>Ensuring safety, efficiency, and intelligence at scale.</em>
 </p>
