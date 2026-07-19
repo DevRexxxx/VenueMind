@@ -37,9 +37,22 @@ Rather than one large model trying to reason about an entire stadium at once, th
 
 ---
 
+## 📸 Screenshots
+
+| Command Center Dashboard | Digital Twin View |
+| :---: | :---: |
+| ![Command Center](public/screenshots/dashboard.png) | ![Digital Twin](public/screenshots/digital-twin.png) |
+| *Real-time spatial dashboard for event monitoring* | *Live stadium capacity and crowd flow simulation* |
+
+*(Note: Add actual screenshots to the `public/screenshots/` directory)*
+
+---
+
 ## 🏗️ Architecture
 
-VenueMind utilizes a robust layered architecture, bridging a premium Next.js spatial frontend with an async-first Django/LangGraph Python backend:
+VenueMind utilizes a robust layered architecture, bridging a premium Next.js spatial frontend with an async-first Django/LangGraph Python backend. 
+
+**For a detailed architectural breakdown, please refer to the [System Architecture Document (03_Architecture.md)](03_Architecture.md).**
 
 ```text
 ┌──────────────────────────────────────────────────────┐
@@ -85,31 +98,36 @@ VenueMind utilizes a robust layered architecture, bridging a premium Next.js spa
 
 ## 📁 Project Structure
 
+A detailed explanation of the core directories and their purpose:
+
 ```text
 VenueMind/
 ├── backend/                       # Django + Python Agent Backend
-│   ├── api/                       # DRF Views & Serializers
-│   ├── venuemind_backend/         # Core Django Settings (celery.py, asgi.py)
-│   ├── manage.py                  # Django entrypoint
-│   └── db.sqlite3                 # Local development database
+│   ├── api/                       # DRF Views, Serializers, and API routing
+│   ├── venuemind_backend/         # Core Django Settings, Celery setup, ASGI config
+│   ├── agents/                    # LangGraph/CrewAI specialized agents implementation
+│   ├── requirements.txt           # Python backend dependencies
+│   └── manage.py                  # Django entrypoint
 │
 ├── src/                           # Next.js Frontend Application
 │   ├── app/                       # Next.js App Router (Pages & Layouts)
 │   │   ├── crowd/                 # Crowd Intelligence Module
 │   │   ├── incidents/             # Incident Timeline & Alerts
 │   │   ├── situation/             # Digital Twin & City-Wide View
-│   │   └── ...                    # Other agent domains
-│   │
-│   ├── components/
+│   ├── components/                # Reusable React components
 │   │   ├── dashboard/             # Core UI Modules (DigitalTwin, AgentNetwork)
+│   │   ├── ui/                    # Base UI elements (glassmorphism buttons, cards)
 │   │   └── layout/                # Sidebar, Header, Navigation
-│   │
-│   └── lib/                       # Utilities and helpers
+│   ├── lib/                       # Utility functions, WebSocket clients, helpers
+│   └── styles/                    # Global CSS and Tailwind spatial design tokens
 │
+├── public/                        # Static assets (images, fonts, screenshots)
 ├── 01_PRD.md                      # Product Requirements Document
 ├── 02_TRD.md                      # Technical Requirements Document
-├── 03_Architecture.md             # System Architecture
-└── package.json                   # Frontend dependencies
+├── 03_Architecture.md             # System Architecture Overview
+├── deployment_guide.md            # Detailed hosting and deployment instructions
+├── package.json                   # Frontend dependencies and NPM scripts
+└── README.md                      # Project overview and quick start guide
 ```
 
 ---
@@ -161,6 +179,17 @@ border-radius: 24px;              /* Soft rounded corners */
 
 ---
 
+## 📖 API Documentation
+
+The Django backend automatically generates OpenAPI documentation using Swagger/Redoc. 
+
+Once the backend is running locally, you can view the API documentation at:
+- **Swagger UI:** `http://localhost:8000/api/docs/`
+- **Redoc:** `http://localhost:8000/api/redoc/`
+- **Schema:** `http://localhost:8000/api/schema/`
+
+---
+
 ## 🔧 Installation & Local Setup
 
 ### Prerequisites
@@ -192,6 +221,41 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser. Ensure the backend is concurrently running on port `8000`.
+
+---
+
+## 🚀 Deployment Guide
+
+Deploying VenueMind is simple with our cloud-native architecture.
+- **Backend:** Ready for deployment on Render, Heroku, or AWS with a managed PostgreSQL (Neon.tech) database.
+- **Frontend:** Optimized for Vercel edge deployment.
+
+For complete, step-by-step instructions on deploying both the backend and frontend to a free-tier stack, please see the **[Deployment Guide](deployment_guide.md)**.
+
+---
+
+## 🗺️ Roadmap
+
+- **Q1 2026 (Beta):** Finalize Orchestrator Agent logic and run shadow trials in select stadiums.
+- **Q2 2026 (V1.0):** Roll out CV-assisted weapon detection and live external traffic API integrations.
+- **Q3 2026 (V1.5):** Introduce multi-stadium federated learning to share crowd management insights globally.
+- **Q4 2026:** Full certification and live deployment for the 2026 FIFA World Cup.
+
+---
+
+## 🤝 Contribution Guide
+
+We welcome contributions to make VenueMind the ultimate mega-event operations hub!
+
+1. **Fork the repository.**
+2. **Create a feature branch:** `git checkout -b feature/your-feature-name`
+3. **Follow the Design System:** Ensure any UI changes adhere to the Spatial Design System (glassmorphism, pure black/orange palette).
+4. **Write Tests:** Ensure new backend logic is covered by Pytest, and frontend features pass Playwright E2E tests.
+5. **Commit your changes:** `git commit -m 'Add some feature'`
+6. **Push to the branch:** `git push origin feature/your-feature-name`
+7. **Open a Pull Request.**
+
+For detailed coding standards, refer to `06_System_Design_Rules.md`.
 
 ---
 
